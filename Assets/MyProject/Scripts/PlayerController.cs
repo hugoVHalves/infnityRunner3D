@@ -24,12 +24,15 @@ public class PlayerController : MonoBehaviour
     private float jumpStartTime;
     private float startY;
 
+    private GameManager GM;
 
     void Update()
     {
-        InputManager();
-        Move();
-       
+        if(GM.canMoveRoad)
+        {
+            InputManager();
+            Move();
+        }
         if (isJumping)
         {
             UpdateJump();
@@ -72,6 +75,8 @@ public class PlayerController : MonoBehaviour
     {
         // Initialize position to middle lane
         pos = 2;
+        GM = GameObject.FindAnyObjectByType<GameManager>();
+
     }
 
    
