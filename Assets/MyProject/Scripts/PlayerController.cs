@@ -26,17 +26,35 @@ public class PlayerController : MonoBehaviour
 
     private GameManager GM;
 
+    [Header("Mobile Input Settings")] // Mobile input variables
+    [SerializeFiled] private bool useMobileInput = false;// Toggle between desktop and mobile inputs
+    [SerializeField] private float swipeThreshold = 50f; //minimun distance for a swipe to be detected
+    private Vector2 startTouchPosition;
+    private Vector2 endTouchPosition;
+    private bool isTouching = false;
+
     void Update()
     {
-        if(GM.canMoveRoad)
+        if (GM.canMoveRoad)
         {
-            InputManager();
-            Move();
+            if (useMobileInput)
+            {
+                MobileInputManager();
+            }
+            else
+            {
+                DesktopInputManagar();
+            }
+                Move();
+
         }
-        if (isJumping)
+        if(isJumping)
         {
             UpdateJump();
         }
+           
+        
+        
     }
     void Jump()
     {
@@ -77,6 +95,11 @@ public class PlayerController : MonoBehaviour
         pos = 2;
         GM = GameObject.FindAnyObjectByType<GameManager>();
 
+        if (Application.isMobilePlatform)
+        {
+            useMobileInput = true;
+        }
+
     }
 
    
@@ -101,6 +124,92 @@ public class PlayerController : MonoBehaviour
         }
 
         Debug.Log(pos);
+    }
+    void DesktopInputManagar()
+    {
+        SwipeLeft = Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow);
+        SwipeRight = Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow);
+        SwipeUp = Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space);
+
+        if (SwipeLeft)
+        {
+            SetValue(pos - 1);
+        }
+        else if (SwipeRight)
+        {
+            SetValue(pos + 1);  
+        }
+        else if (SwipeUp) 
+        {
+             Jump();
+        }
+    }
+    void MobileInputManager()
+    {
+        //reset swipe flags
+        SwipeLeft = false;
+        SwipeRight = false;
+        SwipeUp = false;
+
+        //handle touch input
+        if (Input.touchCount > 0)
+        {
+            Touch touch = InputManager().GetTouch(0);
+
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    startTouchPosition = touch.position;
+                    isTouching = true;
+                    break;
+
+                case
+                    if (isTouching)
+                    {
+                        endTouchPosition = touch.position;
+                        DetectSwipe();
+                        isTouching = false;
+                    }
+                    break;
+
+                case TouchPhase.Ended:
+                    isTouching = false;
+                    break;
+
+            }
+        }
+        // Handle mouse input for testing mobile input editor
+#if UNITY_EDITOR
+        if (useMobieleInput)
+        {
+           if (Input.GetMouseButtonDown(0)
+           {
+               startTouchPosition = Input.mousePosition;
+               isTouching = true;
+           }
+           else if (input.GerMouseButtonUp(0) && isTouching)
+           {
+               endTouching = Input.mousePosition;
+               DetectSwipe();
+               isTouching = false;
+
+           }
+       }
+#endif
+
+        //process detected swipes
+        if (SwipeLeft)
+        {
+            SetValue(pos - 1);
+        }
+        else if (SwipeRight)
+        {
+
+        }
+        else if (SwipeUp)
+        {
+            Jump();
+        }
     }
 
     void Move()
@@ -164,5 +273,35 @@ public class PlayerController : MonoBehaviour
             pos = 3;
         else
             pos = value;
+    }
+    void detectSwipe()
+    {
+        Vector2 swipeVector = endTouchPosition - startTouchPosition;
+        float swipeDistance = swipeVector.magnitude;   
+
+        if(swipeDistance < swipeThreshold)
+        {
+            return;
+        }
+        swipeVector.Normalize();
+
+        if(Mathf.Abs(swipeVector.x) > Mathf.Abs(swipeVector.y))
+        {
+            if (swipeVector.x > 0)
+            {
+                SwipeRight = true;
+            }
+            else
+            {
+                SwipeLeft = true;
+            }
+            else
+            {
+                if(swipeVector.y > 0)
+                {
+                    SwipeUp = true;
+                }
+            }
+        }
     }
 }
