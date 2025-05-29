@@ -158,7 +158,7 @@ public class PlayerController : MonoBehaviour
         //handle touch input
         if (Input.touchCount > 0)
         {
-            Touch touch = InputManager().GetTouch(0);
+            Touch touch = Input.GetTouch(0);
 
             switch (touch.phase)
             {
@@ -183,7 +183,24 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        // Handle mouse input for testing mobile input editor
+#if UNITY_EDITOR
+        if (useMobileInput)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                startTouchPosition = Input.mousePosition;
+                isTouching = true;
+            }
+            else if (Input.GetMouseButtonUp(0) && isTouching)
+            {
+                endTouchPosition = Input.mousePosition;
+                DetectSwipe();
+                isTouching = false;
 
+            }
+        }
+#endif
 
         //process detected swipes
         if (SwipeLeft)
@@ -192,7 +209,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (SwipeRight)
         {
-
+            SetValue(pos + 1);
         }
         else if (SwipeUp)
         {
@@ -265,7 +282,7 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    void detectSwipe()
+    void DetectSwipe()
     {
         Vector2 swipeVector = endTouchPosition - startTouchPosition;
         float swipeDistance = swipeVector.magnitude;
