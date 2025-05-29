@@ -1,4 +1,7 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -27,7 +30,7 @@ public class PlayerController : MonoBehaviour
     private GameManager GM;
 
     [Header("Mobile Input Settings")] // Mobile input variables
-    [SerializeFiled] private bool useMobileInput = false;// Toggle between desktop and mobile inputs
+    [SerializeField] private bool useMobileInput = false;// Toggle between desktop and mobile inputs
     [SerializeField] private float swipeThreshold = 50f; //minimun distance for a swipe to be detected
     private Vector2 startTouchPosition;
     private Vector2 endTouchPosition;
@@ -45,39 +48,39 @@ public class PlayerController : MonoBehaviour
             {
                 DesktopInputManagar();
             }
-                Move();
+            Move();
+
+            if (isJumping)
+            {
+                UpdateJump();
+            }
 
         }
-        if(isJumping)
-        {
-            UpdateJump();
-        }
-           
-        
-        
     }
+
     void Jump()
     {
-        if(!isJumping)
+        if (!isJumping)
         {
-            if(animator != null)
+            if (animator != null)
             {
                 animator.SetTrigger("Jump");
-                    Debug.Log("Jumo Triggered");
+                Debug.Log("Jumo Triggered");
             }
             isJumping = true;
             jumpStartTime = Time.time;
             startY = characterToMove.transform.position.y;
         }
     }
+
     void UpdateJump()
     {
-        float jumpProgress = (Time.time - jumpStartTime) / jumpDuration;   
-        if(jumpProgress >= 1.0f)
+        float jumpProgress = (Time.time - jumpStartTime) / jumpDuration;
+        if (jumpProgress >= 1.0f)
         {
             isJumping = false;
 
-            Vector3 landPos = characterToMove.transform.position;   
+            Vector3 landPos = characterToMove.transform.position;
             landPos.y = startY;
             characterToMove.transform.position = landPos;
             return;
@@ -102,7 +105,6 @@ public class PlayerController : MonoBehaviour
 
     }
 
-   
 
     void InputManager()
     {
@@ -125,6 +127,7 @@ public class PlayerController : MonoBehaviour
 
         Debug.Log(pos);
     }
+
     void DesktopInputManagar()
     {
         SwipeLeft = Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow);
@@ -137,13 +140,14 @@ public class PlayerController : MonoBehaviour
         }
         else if (SwipeRight)
         {
-            SetValue(pos + 1);  
+            SetValue(pos + 1);
         }
-        else if (SwipeUp) 
+        else if (SwipeUp)
         {
-             Jump();
+            Jump();
         }
     }
+
     void MobileInputManager()
     {
         //reset swipe flags
@@ -163,7 +167,7 @@ public class PlayerController : MonoBehaviour
                     isTouching = true;
                     break;
 
-                case
+                case TouchPhase.Ended:
                     if (isTouching)
                     {
                         endTouchPosition = touch.position;
@@ -172,30 +176,14 @@ public class PlayerController : MonoBehaviour
                     }
                     break;
 
-                case TouchPhase.Ended:
+                case TouchPhase.Canceled:
                     isTouching = false;
                     break;
 
             }
         }
-        // Handle mouse input for testing mobile input editor
-#if UNITY_EDITOR
-        if (useMobieleInput)
-        {
-           if (Input.GetMouseButtonDown(0)
-           {
-               startTouchPosition = Input.mousePosition;
-               isTouching = true;
-           }
-           else if (input.GerMouseButtonUp(0) && isTouching)
-           {
-               endTouching = Input.mousePosition;
-               DetectSwipe();
-               isTouching = false;
 
-           }
-       }
-#endif
+
 
         //process detected swipes
         if (SwipeLeft)
@@ -211,6 +199,7 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
     }
+
 
     void Move()
     {
@@ -262,9 +251,9 @@ public class PlayerController : MonoBehaviour
             smoothTime);
     }
 
-   
 
-    private void SetValue(int value)
+
+    void SetValue(int value)
     {
         // Apply boundaries: can't go lower than 1 or higher than 3
         if (value < 1)
@@ -274,18 +263,20 @@ public class PlayerController : MonoBehaviour
         else
             pos = value;
     }
+
+
     void detectSwipe()
     {
         Vector2 swipeVector = endTouchPosition - startTouchPosition;
-        float swipeDistance = swipeVector.magnitude;   
+        float swipeDistance = swipeVector.magnitude;
 
-        if(swipeDistance < swipeThreshold)
+        if (swipeDistance < swipeThreshold)
         {
             return;
         }
         swipeVector.Normalize();
 
-        if(Mathf.Abs(swipeVector.x) > Mathf.Abs(swipeVector.y))
+        if (Mathf.Abs(swipeVector.x) > Mathf.Abs(swipeVector.y))
         {
             if (swipeVector.x > 0)
             {
@@ -295,13 +286,14 @@ public class PlayerController : MonoBehaviour
             {
                 SwipeLeft = true;
             }
-            else
+        }
+        else
+        {
+            if (swipeVector.y > 0)
             {
-                if(swipeVector.y > 0)
-                {
-                    SwipeUp = true;
-                }
+                SwipeUp = true;
             }
+
         }
     }
 }
