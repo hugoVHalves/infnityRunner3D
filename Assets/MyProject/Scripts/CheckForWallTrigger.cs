@@ -15,6 +15,7 @@ public class CheckForWallTrigger : MonoBehaviour
             Debug.Log("obstacle");
             GetComponentInChildren<Animator>().SetTrigger("End");
             GameObject.FindAnyObjectByType<GameManager>().End();
+            //Debug.Log("asdbhwdgyuasyduw");
         }
     }
 }
